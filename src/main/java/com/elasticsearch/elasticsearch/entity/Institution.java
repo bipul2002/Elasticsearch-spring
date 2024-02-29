@@ -8,36 +8,37 @@ import lombok.NoArgsConstructor;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
 
-import java.time.LocalDateTime;
+import java.util.List;
 
+@Entity
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@Entity
 @DynamicInsert
 @DynamicUpdate
-public class Post {
+public class Institution {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long postId;
-    private String content;
-    private LocalDateTime postedAt;
+    private Long institutionId;
+
+    private String name;
+    private String industry;
+    private String  websiteURL;
+    private String description;
+    private String institutionImageUrl;
+
+    @OneToMany(mappedBy = "institution", cascade = CascadeType.ALL)
+    private List<Post> institutionPosts;
 
     @ManyToOne
+    @JoinColumn(name = "admin_id")
     @JsonIgnore
-    @JoinColumn(name = "profile_id")
-    private Profile profile;
+    private User admin;
 
-
-    @ManyToOne
+    @ManyToMany
     @JsonIgnore
-    @JoinColumn(name = "company_id")
-    private Company company;
+    private List<User> followers;
 
-    @ManyToOne
-    @JsonIgnore
-    @JoinColumn(name = "institution_id")
-    private Institution institution;
 
 }

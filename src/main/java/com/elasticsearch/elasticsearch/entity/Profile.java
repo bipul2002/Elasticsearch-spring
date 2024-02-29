@@ -28,7 +28,7 @@ public class Profile {
     private String industry;
     private String profileImageUrl; // URL to the profile picture
 
-    @OneToOne(cascade = CascadeType.DETACH)
+    @OneToOne
     @JoinColumn(name = "user_id")
     @JsonIgnore
     private User user;
@@ -44,7 +44,7 @@ public class Profile {
     private List<Education> educations;
 
 
-    @ManyToMany()
+    @ManyToMany
     private List<Skill> skills;
 
     @Override

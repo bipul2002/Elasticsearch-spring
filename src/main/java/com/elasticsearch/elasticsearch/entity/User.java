@@ -37,4 +37,22 @@ public class User {
 
     @ManyToMany(mappedBy = "members")
     private List<Groups> groups;
+
+    @OneToMany(mappedBy = "admin", cascade = CascadeType.ALL)
+    private List<Company> companiesAdmin;
+
+    @ManyToMany(mappedBy = "followers")
+//    @JoinTable(
+//            name = "user_following_company",
+//            joinColumns = @JoinColumn(name = "user_id"),
+//            inverseJoinColumns = @JoinColumn(name = "company_id")
+//    )
+    private List<Company> followingCompanies;
+
+    @OneToMany(mappedBy = "admin", cascade = CascadeType.ALL)
+    private List<Institution> institutionAdmin;
+
+    @ManyToMany(mappedBy = "followers")
+
+    private List<Institution> followingInstitutions;
 }

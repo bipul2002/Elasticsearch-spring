@@ -2,6 +2,7 @@ package com.elasticsearch.elasticsearch.controller;
 
 import com.elasticsearch.elasticsearch.entity.Company;
 import com.elasticsearch.elasticsearch.entity.JobPosting;
+import com.elasticsearch.elasticsearch.entity.Post;
 import com.elasticsearch.elasticsearch.service.CompanyService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -68,6 +69,52 @@ public class CompanyController {
         List<JobPosting> jobPostings = companyService.getAllJobPostingsByCompanyId(companyId);
         return new ResponseEntity<>(jobPostings, HttpStatus.OK);
     }
+
+
+    //crete a company through  the userId
+    @PostMapping("/create/{adminId}")
+    public ResponseEntity<Company> createCompany(@RequestBody Company company, @PathVariable("adminId") Long userId) {
+        Company createdCompany = companyService.createCompany(company, userId);
+        if (createdCompany != null) {
+            return new ResponseEntity<>(createdCompany, HttpStatus.CREATED);
+        } else {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @PostMapping("/{companyId}/follow/{userId}")
+    public ResponseEntity<String> followCompany(@PathVariable("companyId") Long companyId, @PathVariable("userId") Long userId) {
+        companyService.followCompany(companyId, userId);
+        return new ResponseEntity<>("Successfully followed the company", HttpStatus.OK);
+    }
+
+    @PostMapping("/{companyId}/unfollow/{userId}")
+    public ResponseEntity<String> unfollowCompany(@PathVariable("companyId") Long companyId, @PathVariable("userId") Long userId) {
+        companyService.unfollowCompany(companyId, userId);
+        return new ResponseEntity<>("Successfully unfollowed the company", HttpStatus.OK);
+    }
+
+
+    @PostMapping("/{companyId}/posts")
+    public ResponseEntity<Post> createPost(@PathVariable("companyId") Long companyId, @RequestBody Post post) {
+        return new ResponseEntity<>(companyService.createPost(companyId, post), HttpStatus.CREATED);
+    }
+
+    @DeleteMapping("/{companyId}/posts/{postId}")
+    public ResponseEntity<String> deletePost(@PathVariable("companyId") Long companyId, @PathVariable("postId") Long postId) {
+        companyService.deletePost(companyId, postId);
+        return new ResponseEntity<>("Post deleted successfully", HttpStatus.OK);
+    }
+
+
+    @GetMapping("/{companyId}/posts")
+    public ResponseEntity<List<Post>> getAllPostsByCompanyId(@PathVariable("companyId") Long companyId) {
+        List<Post> posts = companyService.getAllPostsByCompanyId(companyId);
+        return new ResponseEntity<>(posts, HttpStatus.OK);
+    }
+
+
+
 
 
 

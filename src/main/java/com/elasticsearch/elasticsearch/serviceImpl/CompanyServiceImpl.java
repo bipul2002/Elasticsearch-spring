@@ -1,15 +1,19 @@
 package com.elasticsearch.elasticsearch.serviceImpl;
 
-import com.elasticsearch.elasticsearch.entity.Company;
-import com.elasticsearch.elasticsearch.entity.JobPosting;
+import com.elasticsearch.elasticsearch.entity.*;
 import com.elasticsearch.elasticsearch.repository.CompanyRepository;
 import com.elasticsearch.elasticsearch.repository.JobPostingRepository;
+import com.elasticsearch.elasticsearch.repository.PostRepository;
+import com.elasticsearch.elasticsearch.repository.UserRepository;
 import com.elasticsearch.elasticsearch.service.CompanyService;
 import jakarta.transaction.Transactional;
+import org.elasticsearch.ResourceNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class CompanyServiceImpl implements CompanyService {
@@ -17,6 +21,11 @@ public class CompanyServiceImpl implements CompanyService {
     private CompanyRepository companyRepository;
     @Autowired
     private JobPostingRepository jobPostingRepository;
+    @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
+    private PostRepository postRepository;
     @Override
     public Company createCompany(Company company) {
         return companyRepository.save(company);
@@ -71,5 +80,87 @@ public class CompanyServiceImpl implements CompanyService {
             return jobPostingRepository.findAllByCompany(company);
         }
         return null;
+    }
+
+    @Override
+    public Company createCompany(Company company, Long userId) {
+
+        User admin = userRepository.findByUserId(userId).orElse(null);
+        if(admin!=null){
+            company.setAdmin(admin);
+            admin.getCompaniesAdmin().add(company);
+            return companyRepository.save(company);
+
+        }
+        return null;
+    }
+
+    @Override
+    public void followCompany(Long companyId, Long userId) {
+
+        List<User> followers = null;
+
+        Company company = companyRepository.findByCompanyId(companyId).orElse(null);
+        User user = userRepository.findById(userId).orElse(null);
+
+
+        assert company != null;
+        followers = company.getFollowers();
+        followers.add(user);
+        company.setFollowers(followers);
+        companyRepository.save(company);
+
+
+    }
+
+    @Override
+    public void unfollowCompany(Long companyId, Long userId) {
+        Company company = companyRepository.findByCompanyId(companyId).orElse(null);
+        User user = userRepository.findById(userId).orElse(null);
+        List<User> followers = null;
+        assert company!=null;
+        followers = company.getFollowers();
+        followers.remove(user);
+        company.setFollowers(followers);
+        companyRepository.save(company);
+
+
+    }
+
+    @Override
+    public Post createPost(Long companyId, Post post) {
+
+        Optional<Company> company = companyRepository.findByCompanyId(companyId);
+
+        if (company.isPresent()) {
+            Company company1 = company.get();
+            post.setCompany(company1);
+            post.setPostedAt(LocalDateTime.now()); // Set the current timestamp
+
+            // Save the post
+            return postRepository.save(post);
+        }
+
+        return  null;
+    }
+
+    @Override
+    public void deletePost(Long companyId, Long postId) {
+        Company company = companyRepository.findByCompanyId(companyId).orElse(null);
+        Post post = postRepository.findByPostId(postId).orElse(null);
+        if(company!=null && post!=null){
+            post.setCompany(null);
+            postRepository.delete(post);
+        }else {
+            throw  new ResourceNotFoundException("company or Post Id may not be present");
+        }
+
+    }
+
+    @Override
+    public List<Post> getAllPostsByCompanyId(Long companyId) {
+
+        Company company = companyRepository.findByCompanyId(companyId).orElseThrow(()-> new ResourceNotFoundException("company id"+ companyId + " "+ "not found"));
+        return postRepository.findAllByCompany(company);
     }
 }
