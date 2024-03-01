@@ -13,7 +13,7 @@ public interface UserService {
     User findByUserId(Long userId);
 
     //create a new user
-    User createUser(User user);
+    User createUser(User user) throws Exception;
 
     //update a user
     User updateUser(User user);

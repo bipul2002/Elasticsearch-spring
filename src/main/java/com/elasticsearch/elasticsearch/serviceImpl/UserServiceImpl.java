@@ -8,6 +8,7 @@ import com.elasticsearch.elasticsearch.repository.UserRepository;
 import com.elasticsearch.elasticsearch.service.ProfileService;
 import com.elasticsearch.elasticsearch.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -23,14 +24,29 @@ public class UserServiceImpl implements UserService {
 
     @Autowired
     private ProfileService profileService;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
     @Override
     public User findByUserId(Long userId) {
         return userRepository.findById(userId).orElse(null);
     }
 
     @Override
-    public User createUser(User user) {
-        return userRepository.save(user);
+    public User createUser(User user) throws Exception {
+        User local = this.userRepository.findByEmail(user.getEmail());
+        if(local!=null)
+        {
+            System.out.println("User already Exist");
+            throw new Exception("User already Exist");
+        }else {
+            // tempUser.setUserId(UUID.randomUUID());
+            user.setPassword(passwordEncoder.encode(user.getPassword()));
+            local = this.userRepository.save(user);
+        }
+
+        return local;
+
     }
 
     @Override

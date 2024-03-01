@@ -30,7 +30,7 @@ public class UserController {
     }
 
     @PostMapping("/create")
-    public ResponseEntity<User> createUser(@RequestBody User user) {
+    public ResponseEntity<User> createUser(@RequestBody User user) throws Exception {
         User createdUser = userService.createUser(user);
         return ResponseEntity.ok(createdUser);
     }
