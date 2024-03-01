@@ -53,6 +53,5 @@ public class User {
     private List<Institution> institutionAdmin;
 
     @ManyToMany(mappedBy = "followers")
-
     private List<Institution> followingInstitutions;
 }
