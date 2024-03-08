@@ -1,5 +1,7 @@
 package com.elasticsearch.elasticsearch.service;
 
+import com.elasticsearch.elasticsearch.elasticEntity.ProfileElasticsearch;
+import com.elasticsearch.elasticsearch.elasticEntity.UserElasticsearch;
 import com.elasticsearch.elasticsearch.entity.Post;
 import com.elasticsearch.elasticsearch.entity.Profile;
 
@@ -19,4 +21,8 @@ public interface ProfileService {
     void addSkillToProfile(Long profileId, Long skillId);
 
     void removeSkillFromProfile(Long profileId, Long skillId);
+
+
+    //elasticserach Implementation
+   // ProfileElasticsearch convertToProfileElasticsearch(Profile profile,UserElasticsearch userElasticsearch);
 }

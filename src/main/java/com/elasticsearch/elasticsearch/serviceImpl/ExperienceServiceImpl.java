@@ -1,5 +1,6 @@
 package com.elasticsearch.elasticsearch.serviceImpl;
 
+import com.elasticsearch.elasticsearch.elasticsearch.ElasticsearchIndexer;
 import com.elasticsearch.elasticsearch.entity.Experience;
 import com.elasticsearch.elasticsearch.entity.Profile;
 import com.elasticsearch.elasticsearch.repository.ExperienceRepository;
@@ -17,6 +18,9 @@ public class ExperienceServiceImpl implements ExperienceService {
 
     @Autowired
     private ProfileRepository profileRepository;
+
+    @Autowired
+    private ElasticsearchIndexer elasticsearchIndexer;
     @Override
     public Experience createExperience(Experience experience, Long profileId) {
         Optional<Profile> optionalProfile = profileRepository.findById(profileId);
@@ -25,8 +29,17 @@ public class ExperienceServiceImpl implements ExperienceService {
             Profile profile = optionalProfile.get();
             experience.setProfile(profile);
 
+            Experience saveExperience = experienceRepository.save(experience);
+
+            elasticsearchIndexer.indexExperience(saveExperience,profileId);
+
+
+
+
+
+
             // Save the experience
-            return experienceRepository.save(experience);
+            return saveExperience;
         }
 
         return null;

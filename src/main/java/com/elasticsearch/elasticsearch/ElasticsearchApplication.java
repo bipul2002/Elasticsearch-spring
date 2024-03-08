@@ -11,7 +11,7 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
 @SpringBootApplication
 //@ComponentScan(basePackages ="com.elasticsearch.elasticsearch.serviceImpl")
-//@EnableElasticsearchRepositories(basePackages = "com.elasticsearch.elasticsearch.repository.elasticsearch")
+//@EnableElasticsearchRepositories(basePackages = "com.elasticsearch.elasticsearch.elastisearchRepository.elasticsearch")
 //@EnableJpaRepositories(basePackages = "com.elasticsearch.elasticsearch.repository.jpa")
 public class ElasticsearchApplication{
     @Autowired

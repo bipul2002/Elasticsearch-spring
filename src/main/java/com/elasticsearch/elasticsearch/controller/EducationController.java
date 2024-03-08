@@ -15,7 +15,7 @@ public class EducationController  {
 
     @PostMapping("/create/{profileId}")
     public ResponseEntity<Education> createEducation(@RequestBody Education education,
-                                                     @PathVariable Long profileId) {
+                                                     @PathVariable("profileId") Long profileId) {
         Education createdEducation = educationService.createEducation(education, profileId);
 
         if (createdEducation != null) {

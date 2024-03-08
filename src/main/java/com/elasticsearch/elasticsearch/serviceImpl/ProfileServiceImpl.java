@@ -1,13 +1,15 @@
 package com.elasticsearch.elasticsearch.serviceImpl;
 
+
+import com.elasticsearch.elasticsearch.elasticsearch.ElasticsearchIndexer;
 import com.elasticsearch.elasticsearch.entity.*;
 import com.elasticsearch.elasticsearch.repository.ProfileRepository;
 import com.elasticsearch.elasticsearch.repository.SkillRepository;
 import com.elasticsearch.elasticsearch.repository.UserRepository;
 import com.elasticsearch.elasticsearch.service.ProfileService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
 import org.springframework.stereotype.Service;
-
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -22,6 +24,13 @@ public class ProfileServiceImpl implements ProfileService {
 
     @Autowired
     private UserRepository userRepository;
+    @Autowired
+    private ElasticsearchOperations elasticsearchOperations ;
+
+    @Autowired
+    private ElasticsearchIndexer elasticsearchIndexer;
+
+
     @Override
     public Profile getById(Long profileId) {
         return profileRepository.findById(profileId).orElse(null);
@@ -33,12 +42,21 @@ public class ProfileServiceImpl implements ProfileService {
 
         if (optionalUser.isPresent()) {
             User user = optionalUser.get();
+
+            // User does not have a profile, create a new one
             profile.setUser(user);
+            Profile savedProfile = profileRepository.save(profile);
 
-            // Save the profile
-            return profileRepository.save(profile);
+            // Update the user with the new profile
+            user.setProfile(savedProfile);
+            userRepository.save(user);
+
+            // Index the profile in Elasticsearch
+            elasticsearchIndexer.indexProfile(savedProfile,userId);
+
+            // Return the saved profile
+            return savedProfile;
         }
-
         return null;
     }
 
@@ -66,9 +84,6 @@ public class ProfileServiceImpl implements ProfileService {
         } else {
             System.out.println("Profile ID is not found");
         }
-
-
-
     }
 
     @Override

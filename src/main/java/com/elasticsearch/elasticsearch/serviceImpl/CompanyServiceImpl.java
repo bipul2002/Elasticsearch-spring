@@ -1,5 +1,6 @@
 package com.elasticsearch.elasticsearch.serviceImpl;
 
+import com.elasticsearch.elasticsearch.elasticsearch.ElasticsearchIndexer;
 import com.elasticsearch.elasticsearch.entity.*;
 import com.elasticsearch.elasticsearch.repository.CompanyRepository;
 import com.elasticsearch.elasticsearch.repository.JobPostingRepository;
@@ -26,6 +27,8 @@ public class CompanyServiceImpl implements CompanyService {
 
     @Autowired
     private PostRepository postRepository;
+    @Autowired
+    private ElasticsearchIndexer elasticsearchIndexer;
     @Override
     public Company createCompany(Company company) {
         return companyRepository.save(company);
@@ -89,7 +92,14 @@ public class CompanyServiceImpl implements CompanyService {
         if(admin!=null){
             company.setAdmin(admin);
             admin.getCompaniesAdmin().add(company);
-            return companyRepository.save(company);
+
+            Company savedCompany = companyRepository.save(company);
+
+            elasticsearchIndexer.indexCompany(savedCompany,userId);
+
+
+
+            return savedCompany;
 
         }
         return null;
@@ -137,8 +147,12 @@ public class CompanyServiceImpl implements CompanyService {
             post.setCompany(company1);
             post.setPostedAt(LocalDateTime.now()); // Set the current timestamp
 
+            Post savePost = postRepository.save(post);
+
+            elasticsearchIndexer.indexPostInCompany(savePost,companyId);
+
             // Save the post
-            return postRepository.save(post);
+            return savePost;
         }
 
         return  null;

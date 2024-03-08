@@ -1,5 +1,6 @@
 package com.elasticsearch.elasticsearch.serviceImpl;
 
+import com.elasticsearch.elasticsearch.elasticsearch.ElasticsearchIndexer;
 import com.elasticsearch.elasticsearch.entity.Post;
 import com.elasticsearch.elasticsearch.entity.Profile;
 import com.elasticsearch.elasticsearch.repository.PostRepository;
@@ -21,6 +22,8 @@ public class PostServiceImpl implements PostService {
 
     @Autowired
     private PostRepository postRepository;
+    @Autowired
+    private ElasticsearchIndexer elasticsearchIndexer;
 
     @Override
     public Post createPost(Post post, Long profileId) {
@@ -32,8 +35,12 @@ public class PostServiceImpl implements PostService {
             post.setProfile(profile);
             post.setPostedAt(LocalDateTime.now()); // Set the current timestamp
 
+
+            Post savePost = postRepository.save(post);
+            elasticsearchIndexer.indexPostInProfile(savePost,profileId);
+
             // Save the post
-            return postRepository.save(post);
+            return  savePost;
         }
 
         return  null;

@@ -1,5 +1,7 @@
 package com.elasticsearch.elasticsearch.serviceImpl;
 
+import co.elastic.clients.elasticsearch.ml.Job;
+import com.elasticsearch.elasticsearch.elasticsearch.ElasticsearchIndexer;
 import com.elasticsearch.elasticsearch.entity.Company;
 import com.elasticsearch.elasticsearch.entity.JobPosting;
 import com.elasticsearch.elasticsearch.repository.CompanyRepository;
@@ -18,8 +20,20 @@ public class JobPostingServiceImpl implements JobPostingService {
 
     @Autowired
     private CompanyRepository companyRepository;
+
+    @Autowired
+    private ElasticsearchIndexer elasticsearchIndexer;
     @Override
-    public JobPosting createJobPosting(JobPosting jobPosting) {
+    public JobPosting createJobPosting(JobPosting jobPosting, Long companyId) {
+
+        Company company = companyRepository.findByCompanyId(companyId).orElse(null);
+
+        if(company!=null){
+            jobPosting.setCompany(company);
+            company.getJobPostings().add(jobPosting);
+            JobPosting saveJobPosting = jobPostingRepository.save(jobPosting);
+            elasticsearchIndexer.indexJobPosting(saveJobPosting,companyId);
+        }
         return jobPostingRepository.save(jobPosting);
     }
 

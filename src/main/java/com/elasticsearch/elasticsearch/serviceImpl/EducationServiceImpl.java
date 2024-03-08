@@ -1,5 +1,7 @@
 package com.elasticsearch.elasticsearch.serviceImpl;
 
+import com.elasticsearch.elasticsearch.elasticEntity.EducationElasticsearch;
+import com.elasticsearch.elasticsearch.elasticsearch.ElasticsearchIndexer;
 import com.elasticsearch.elasticsearch.entity.Education;
 import com.elasticsearch.elasticsearch.entity.Profile;
 import com.elasticsearch.elasticsearch.repository.EducationRepository;
@@ -17,6 +19,9 @@ public class EducationServiceImpl implements EducationService {
 
     @Autowired
     private ProfileRepository profileRepository;
+
+    @Autowired
+    private ElasticsearchIndexer elasticsearchIndexer;
     @Override
     public Education createEducation(Education education, Long ProfileId) {
         Optional<Profile> optionalProfile = profileRepository.findById(ProfileId);
@@ -25,8 +30,12 @@ public class EducationServiceImpl implements EducationService {
             Profile profile = optionalProfile.get();
             education.setProfile(profile);
 
+            Education saveEducation =  educationRepository.save(education);
+            elasticsearchIndexer.indexEducation(saveEducation,ProfileId);
+
+
             // Save the education
-            return educationRepository.save(education);
+            return saveEducation;
         }
 
         return null;

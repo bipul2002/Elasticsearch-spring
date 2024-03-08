@@ -1,6 +1,7 @@
 package com.elasticsearch.elasticsearch.serviceImpl;
 
 
+import com.elasticsearch.elasticsearch.elasticsearch.ElasticsearchIndexer;
 import com.elasticsearch.elasticsearch.entity.Institution;
 import com.elasticsearch.elasticsearch.entity.Post;
 import com.elasticsearch.elasticsearch.entity.User;
@@ -27,13 +28,22 @@ public class InstitutionServiceImpl implements InstitutionService {
 
     @Autowired
     private PostRepository postRepository;
+
+    @Autowired
+    private ElasticsearchIndexer elasticsearchIndexer;
     @Override
     public Institution createInstitution(Institution institution, Long userId) {
         User admin = userRepository.findByUserId(userId).orElse(null);
         if(admin!=null){
             institution.setAdmin(admin);
             admin.getInstitutionAdmin().add(institution);
-            return institutionRepository.save(institution);
+
+            Institution saveInstitution = institutionRepository.save(institution);
+
+            elasticsearchIndexer.indexInstitution(saveInstitution,userId);
+
+
+            return  saveInstitution;
 
         }
         return null;
@@ -77,8 +87,12 @@ public class InstitutionServiceImpl implements InstitutionService {
             post.setInstitution(institution1);
             post.setPostedAt(LocalDateTime.now()); // Set the current timestamp
 
+            Post savePost = postRepository.save(post);
+
+            elasticsearchIndexer.indexPostInInstitution(savePost,institutionId);
+
             // Save the post
-            return postRepository.save(post);
+            return savePost;
         }
 
         return  null;

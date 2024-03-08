@@ -17,9 +17,9 @@ public class JobPostingController {
     @Autowired
     private JobPostingService jobPostingService;
 
-    @PostMapping("/create")
-    public ResponseEntity<JobPosting> createJobPosting(@RequestBody JobPosting jobPosting) {
-        JobPosting createdJobPosting = jobPostingService.createJobPosting(jobPosting);
+    @PostMapping("/create/{companyId}")
+    public ResponseEntity<JobPosting> createJobPosting(@RequestBody JobPosting jobPosting,@PathVariable("companyId") Long companyId) {
+        JobPosting createdJobPosting = jobPostingService.createJobPosting(jobPosting,companyId);
         return new ResponseEntity<>(createdJobPosting, HttpStatus.CREATED);
     }
 

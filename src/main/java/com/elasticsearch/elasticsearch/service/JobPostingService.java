@@ -5,7 +5,7 @@ import com.elasticsearch.elasticsearch.entity.JobPosting;
 import java.util.List;
 
 public interface JobPostingService {
-    JobPosting createJobPosting(JobPosting jobPosting);
+    JobPosting createJobPosting(JobPosting jobPosting, Long companyId);
     void deleteJobPosting(Long jobPostingId);
     JobPosting updateJobPosting(JobPosting jobPosting);
     JobPosting getJobPostingById(Long jobPostingId);
